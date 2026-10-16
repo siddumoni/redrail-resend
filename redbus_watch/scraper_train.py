@@ -317,6 +317,8 @@ def fetch_train_availability(
     destination: str,
     date: str,
     classes_filter: Optional[List[str]] = None,
+    train_number: Optional[str] = None,
+    train_name: Optional[str] = None,    
 ) -> Dict[str, dict]:
     """Resolve stations and fetch live train availability through RedBus's UI session."""
     if not source or not destination:
@@ -377,7 +379,31 @@ def fetch_train_availability(
                 parsed = _check_response(response, "Train search")
                 if not isinstance(parsed, dict) or "trainBtwnStnsList" not in parsed:
                     raise ScrapeError("Train search response schema was not recognized; no availability alert will be generated.")
-                return parse_train_search_response(parsed, classes_filter=classes_filter, travel_date=date)
+                snapshots = parse_train_search_response(
+                    parsed,
+                    classes_filter=classes_filter,
+                    travel_date=date,
+                )
+
+                # Filter by train number and/or train name before state tracking.
+                if train_number or train_name:
+                    wanted_number = str(train_number or "").strip()
+                    wanted_name = _norm(train_name) if train_name else ""
+                
+                    snapshots = {
+                        key: item
+                        for key, item in snapshots.items()
+                        if (
+                            not wanted_number
+                            or str(item.get("train_no", "")).strip() == wanted_number
+                        )
+                        and (
+                            not wanted_name
+                            or wanted_name in _norm(item.get("train_name", ""))
+                        )
+                    }
+                
+                return snapshots
             finally:
                 browser.close()
     except ScrapeError:
