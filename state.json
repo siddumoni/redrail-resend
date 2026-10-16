@@ -4998,7 +4998,7 @@
         "departure_time": "22:00",
         "duration": "08:00",
         "from_station": "MAS",
-        "last_updated": "1 hr ago",
+        "last_updated": "2 hr ago",
         "price": 340,
         "quota": "GN",
         "status_text": "Available 196",
@@ -5222,7 +5222,7 @@
         "departure_time": "20:55",
         "duration": "07:02",
         "from_station": "MAS",
-        "last_updated": "8 hr ago",
+        "last_updated": "9 hr ago",
         "price": 1035,
         "quota": "GN",
         "status_text": "RAC 2",
@@ -5329,21 +5329,21 @@
       "22651_mas_poy_sl_gn": {
         "arrival_time": "07:35",
         "availability_date": "15-12-2026",
-        "available": 256,
+        "available": 253,
         "class": "SL",
         "departure_time": "21:30",
         "duration": "10:05",
         "from_station": "MAS",
-        "last_updated": "9 hr ago",
+        "last_updated": "Few mins ago",
         "price": 400,
         "quota": "GN",
-        "status_text": "Available 256",
+        "status_text": "Available 253",
         "to_station": "POY",
         "train_name": "Mas Pgt Express",
         "train_no": "22651"
       }
     },
-    "last_success_ts": "2026-10-16T16:39:55.454952+00:00",
+    "last_success_ts": "2026-10-16T16:46:48.752894+00:00",
     "watch_id": "train:chennai:coimbatore:2026-12-15:3a,sl"
   }
 }
