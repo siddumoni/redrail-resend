@@ -63,7 +63,10 @@ def run_once(
     watches: List[Watch],
     states: Dict,
     fetch_bus_fn: Callable[[str, str, str, str, Optional[List[str]]], Dict[str, dict]],
-    fetch_train_fn: Callable[[str, str, str, Optional[List[str]]], Dict[str, dict]],
+    fetch_train_fn: Callable[
+    [str, str, str, Optional[List[str]], Optional[str], Optional[str]],
+    Dict[str, dict],
+    ],
     send_email_fn: Callable[[str, str], None],
     fail_threshold: int = FAIL_THRESHOLD_DEFAULT,
     now_iso: Optional[str] = None,
@@ -95,7 +98,7 @@ def run_once(
             if watch.type == "bus":
                 fresh = fetch_bus_fn(watch.source, watch.destination, watch.date, watch.seat_type, watch.operators)
             else:
-                fresh = fetch_train_fn(watch.source, watch.destination, watch.date, watch.classes)
+                fresh = fetch_train_fn(watch.source, watch.destination, watch.date, watch.classes, watch.train_number, watch.train_name,)
         except Exception as e:
             summary["failed_watches"].append(wid)
             summary["errors"][wid] = str(e)
