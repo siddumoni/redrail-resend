@@ -260,12 +260,30 @@ def test_train_classes_status_and_fare_use_compact_aligned_columns():
         ],
     }]
     html = build_digest_email(sections)
-    assert "width:72px" in html
-    assert "width:170px" in html
-    assert "width:104px" in html
+    assert "width:20%" in html
+    assert "width:52%" in html
+    assert "width:28%" in html
     assert "background:#eef0f2" in html  # grey class box
     assert "background:#e8f6ed" in html  # Available
     assert "background:#fff0e2" in html  # RAC
     assert "background:#ffeaed" in html  # WL
     assert "background:#eef0f3" in html  # PQ
     assert "₹340" in html and "₹935" in html and "₹1,285" in html and "₹2,115" in html
+
+
+
+def test_train_email_uses_fluid_layout_for_mobile_gmail():
+    sections = [{
+        "watch_label": "Chennai to Coimbatore", "watch_url": "https://example.com",
+        "type": "train", "items": [{
+            "train_name": "Example Express", "train_no": "12345", "class": "3A",
+            "status_text": "Not Available", "price": 1285, "departure_time": "21:05",
+            "arrival_time": "05:10", "duration": "08:05",
+        }],
+    }]
+    html = build_digest_email(sections)
+    assert '<meta name="viewport" content="width=device-width, initial-scale=1.0">' in html
+    assert '<table role="presentation" width="100%"' in html
+    assert "max-width:600px" in html
+    assert "table-layout:fixed" in html
+    assert "overflow-wrap:anywhere" in html
