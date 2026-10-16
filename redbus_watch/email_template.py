@@ -195,6 +195,14 @@ def _train_item_html(item: dict, booking_url: str) -> str:
         label = f"{class_code}: {status_text}" if class_code else status_text
         if quota and quota.upper() != "GN":
             label += f" ({quota})"
+        fare = class_item.get("price")
+        if fare not in (None, ""):
+            try:
+                fare_value = float(str(fare).replace(",", "").replace("₹", "").strip())
+                label += f" · ₹{fare_value:,.0f}"
+            except (TypeError, ValueError):
+                # Preserve a non-numeric fare supplied by the source rather than dropping it.
+                label += f" · ₹{fare}"
         class_chips.append(_chip(label, _chip_level_for_status(status_text)))
 
     details = []
