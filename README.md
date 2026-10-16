@@ -15,7 +15,7 @@ Resend when something newly opens up.
 | Orchestration (`main.py`) | Done, tested |
 | GitHub Actions workflow | Done |
 | **Bus scraping** (`scraper_bus.py`) | **Done - real endpoint confirmed, tested against your actual captured RedBus data** |
-| **Train scraping** (`scraper_train.py`) | **Still a scaffold - endpoints not yet discovered** |
+| **Train scraping** (`scraper_train.py`) | Implemented against the observed RedBus Rails train-search schema; parsing and class filtering have unit tests |
 
 The bus scraper was finished by discovering RedBus's real internal API
 (no public API exists, so this took a few discovery/fix iterations - see
@@ -37,8 +37,7 @@ network responses, which failed silently in earlier attempts.
 RedBus response, not synthetic data - so this is a genuine regression
 test, not a guess.
 
-**Train is not done yet.** RedBus's train-search endpoints are still
-unknown. Same discovery process as bus, just needs one more round:
+**Train availability is implemented.** The current scraper resolves station codes and queries the observed RedBus Rails train-search endpoint. It normalizes class availability, departure and arrival times, duration, fare and quota, then applies optional train-number/name filters. As with any undocumented internal endpoint, a live end-to-end run should be verified periodically because RedBus can change the response schema.
 
 ```bash
 python discover.py --mode train --source Chennai --destination Bangalore --date 2026-08-20
@@ -85,10 +84,7 @@ Add these repo secrets (Settings → Secrets and variables → Actions):
 - `RESEND_FROM`
 - `RESEND_TO`
 
-The workflow (`.github/workflows/redbus-watch.yml`) runs every 15 minutes,
-commits `state.json` back to the repo each run (same pattern as
-bms-resend), and can be triggered manually via the Actions tab
-("Run workflow" button) for testing.
+The workflow (`.github/workflows/redbus-watch.yml`) currently supports manual execution via the Actions tab ("Run workflow" button) and commits `state.json` back to the repo after a run. It does **not** currently define a cron schedule; add a `schedule:` trigger if you want automatic periodic polling.
 
 **On polling frequency**: start at 15 minutes, not tighter. RedBus's bot
 detection is unknown to both of us right now - better to find out it's

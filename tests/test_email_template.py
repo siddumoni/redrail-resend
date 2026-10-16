@@ -175,3 +175,115 @@ def test_bus_item_no_day_offset_suffix_in_arrival():
     html = build_digest_email(sections)
     assert "+1d" not in html
     assert "05:50" in html
+
+
+
+def test_train_row_shows_arrival_and_journey_duration():
+    sections = [{
+        "watch_label": "Chennai to Coimbatore",
+        "watch_url": "https://example.com",
+        "type": "train",
+        "items": [{
+            "train_name": "Cbe VandeBharat", "train_no": "20643", "class": "CC",
+            "status_text": "AVAILABLE 227", "departure_time": "14:15",
+            "arrival_time": "20:05", "duration": "05:50", "is_new": True,
+        }],
+    }]
+    html = build_digest_email(sections)
+    assert "Departs 14:15" in html
+    assert "Arrives 20:05" in html
+    assert "Duration 5h 50m" in html
+
+
+def test_multiple_classes_for_same_train_are_rendered_in_one_row():
+    sections = [{
+        "watch_label": "Chennai to Coimbatore",
+        "watch_url": "https://example.com",
+        "type": "train",
+        "items": [
+            {"train_name": "Cbe VandeBharat", "train_no": "20643", "class": "CC",
+             "status_text": "Available 227", "departure_time": "14:15", "arrival_time": "20:05",
+             "duration": "05:50", "from_station": "MAS", "to_station": "CBE",
+             "availability_date": "10-12-2026", "is_new": False},
+            {"train_name": "Cbe VandeBharat", "train_no": "20643", "class": "EC",
+             "status_text": "Available 12", "departure_time": "14:15", "arrival_time": "20:05",
+             "duration": "05:50", "from_station": "MAS", "to_station": "CBE",
+             "availability_date": "10-12-2026", "is_new": True},
+        ],
+    }]
+    html = build_digest_email(sections)
+    assert html.count("Cbe VandeBharat (20643)") == 1
+    assert "CC</div>" in html and "Available 227" in html
+    assert "EC</div>" in html and "Available 12" in html
+    assert html.count("NEW</span>") == 1
+
+
+
+def test_train_fare_is_displayed_per_class():
+    sections = [{
+        "watch_label": "Chennai to Coimbatore",
+        "watch_url": "https://example.com",
+        "type": "train",
+        "items": [
+            {"train_name": "Cbe VandeBharat", "train_no": "20643", "class": "CC",
+             "status_text": "Available 227", "price": 1250, "from_station": "MAS",
+             "to_station": "CBE", "availability_date": "10-12-2026"},
+            {"train_name": "Cbe VandeBharat", "train_no": "20643", "class": "EC",
+             "status_text": "Available 12", "price": 2400, "from_station": "MAS",
+             "to_station": "CBE", "availability_date": "10-12-2026"},
+        ],
+    }]
+    html = build_digest_email(sections)
+    assert "CC</div>" in html and "Available 227" in html and "₹1,250" in html
+    assert "EC</div>" in html and "Available 12" in html and "₹2,400" in html
+
+
+
+def test_train_classes_status_and_fare_use_compact_aligned_columns():
+    sections = [{
+        "watch_label": "Chennai to Coimbatore",
+        "watch_url": "https://example.com",
+        "type": "train",
+        "items": [
+            {"train_name": "Example Express", "train_no": "12345", "class": "SL",
+             "status_text": "Available 91", "price": 340, "from_station": "MAS",
+             "to_station": "CBE", "availability_date": "13-12-2026"},
+            {"train_name": "Example Express", "train_no": "12345", "class": "3A",
+             "status_text": "RAC 42", "price": 935, "from_station": "MAS",
+             "to_station": "CBE", "availability_date": "13-12-2026"},
+            {"train_name": "Example Express", "train_no": "12345", "class": "2A",
+             "status_text": "WL 18", "price": 1285, "from_station": "MAS",
+             "to_station": "CBE", "availability_date": "13-12-2026"},
+            {"train_name": "Example Express", "train_no": "12345", "class": "1A",
+             "status_text": "PQ 23", "price": 2115, "from_station": "MAS",
+             "to_station": "CBE", "availability_date": "13-12-2026"},
+        ],
+    }]
+    html = build_digest_email(sections)
+    assert "width:20%" in html
+    assert "width:52%" in html
+    assert "width:28%" in html
+    assert "background:#eef0f2" in html  # grey class box
+    assert "background:#e8f6ed" in html  # Available
+    assert "background:#fff0e2" in html  # RAC
+    assert "background:#ffeaed" in html  # WL
+    assert "background:#eef0f3" in html  # PQ
+    assert "₹340" in html and "₹935" in html and "₹1,285" in html and "₹2,115" in html
+
+
+
+def test_train_email_uses_fluid_layout_for_mobile_gmail():
+    sections = [{
+        "watch_label": "Chennai to Coimbatore", "watch_url": "https://example.com",
+        "type": "train", "items": [{
+            "train_name": "Example Express", "train_no": "12345", "class": "3A",
+            "status_text": "Not Available", "price": 1285, "departure_time": "21:05",
+            "arrival_time": "05:10", "duration": "08:05",
+        }],
+    }]
+    html = build_digest_email(sections)
+    assert '<meta name="viewport" content="width=device-width, initial-scale=1.0">' in html
+    assert '<table role="presentation" width="100%"' in html
+    assert "max-width:600px" in html
+    assert "table-layout:fixed" in html
+    assert "overflow-wrap:anywhere" in html

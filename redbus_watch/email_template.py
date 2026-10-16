@@ -66,15 +66,28 @@ def _rating_badge(rating, reviews) -> str:
     )
 
 
-def _format_duration(minutes) -> str:
-    if minutes is None:
+def _format_duration(value) -> str:
+    """Format numeric minutes or API duration strings such as 05:45 / 5h 45m."""
+    if value is None or value == "":
         return ""
+    if isinstance(value, str):
+        raw = value.strip()
+        match = __import__("re").fullmatch(r"(\d{1,3}):(\d{2})", raw)
+        if match:
+            hours, minutes = int(match.group(1)), int(match.group(2))
+            return f"{hours}h" if minutes == 0 else (f"{hours}h {minutes}m" if hours else f"{minutes}m")
+        match = __import__("re").fullmatch(r"(?:(\d+)\s*h)?\s*(?:(\d+)\s*m)?", raw.lower())
+        if match and (match.group(1) or match.group(2)):
+            hours, minutes = int(match.group(1) or 0), int(match.group(2) or 0)
+            return f"{hours}h" if minutes == 0 and hours else (f"{hours}h {minutes}m" if hours else f"{minutes}m")
     try:
-        total_min = int(minutes)
+        total_minutes = int(value)
     except (TypeError, ValueError):
         return ""
-    h, m = divmod(total_min, 60)
-    return f"{h}h {m}m"
+    if total_minutes < 0:
+        return ""
+    hours, minutes = divmod(total_minutes, 60)
+    return f"{hours}h" if minutes == 0 else (f"{hours}h {minutes}m" if hours else f"{minutes}m")
 
 
 def _chip(text: str, level: str) -> str:
@@ -161,24 +174,110 @@ def _bus_item_html(item: dict, booking_url: str) -> str:
     </tr>"""
 
 
+def _train_status_style(status_text: str):
+    """Return semantic colors for railway availability statuses."""
+    status = str(status_text or "").strip().upper()
+    if status.startswith("AVAILABLE"):
+        return "#16834a", "#e8f6ed", "#cfead8"
+    if status.startswith("RAC"):
+        return "#c45100", "#fff0e2", "#ffdfc2"
+    if status.startswith("WL") or "WAITING" in status:
+        return "#c62828", "#ffeaed", "#ffd1d8"
+    if status.startswith("PQ") or status.startswith("REGRET") or status.startswith("NOT AVAILABLE"):
+        return "#566171", "#eef0f3", "#dfe3e8"
+    return "#566171", "#f2f3f5", "#e1e4e8"
+
+
+def _format_train_fare(value):
+    if value in (None, ""):
+        return ""
+    try:
+        amount = float(str(value).replace(",", "").replace("₹", "").strip())
+        return f"₹{amount:,.0f}"
+    except (TypeError, ValueError):
+        return f"₹{escape(str(value))}"
+
+
 def _train_item_html(item: dict, booking_url: str) -> str:
-    train_name = escape(item.get("train_name", ""))
-    train_no = escape(item.get("train_no", ""))
-    cls = escape(item.get("class", ""))
-    status_text = item.get("status_text", "")
-    departure = escape(item.get("departure_time", ""))
+    train_name = escape(str(item.get("train_name", "")))
+    train_no = escape(str(item.get("train_no", "")))
+    departure = escape(str(item.get("departure_time", "")))
+    arrival = escape(str(item.get("arrival_time", "")))
+    duration = _format_duration(item.get("duration"))
+    if not duration:
+        duration = _format_duration(item.get("duration_min"))
     new_badge = _new_badge() if item.get("is_new") else ""
 
-    chip = _chip(status_text or "Available", _chip_level_for_status(status_text or ""))
+    classes = item.get("classes")
+    if not isinstance(classes, list):
+        classes = [item]
+
+    class_rows = []
+    for class_item in classes:
+        class_code = escape(str(class_item.get("class", "—") or "—"))
+        status_text = str(class_item.get("status_text") or "Availability unknown")
+        quota = str(class_item.get("quota") or "").strip()
+        if quota and quota.upper() != "GN":
+            status_text = f"{status_text} ({quota})"
+        status_color, status_bg, status_border = _train_status_style(status_text)
+        fare_html = escape(_format_train_fare(class_item.get("price")))
+        class_rows.append(f"""
+          <tr>
+            <td width="20%" style="width:20%;padding:2px 6px 2px 0;vertical-align:middle;">
+              <div style="box-sizing:border-box;width:100%;text-align:center;padding:7px 3px;border-radius:8px;background:#eef0f2;border:1px solid #e0e3e7;color:#3f4a59;font-size:13px;font-weight:700;">{class_code}</div>
+            </td>
+            <td width="52%" style="width:52%;padding:2px 6px 2px 0;vertical-align:middle;">
+              <div style="box-sizing:border-box;width:100%;padding:7px 7px;border-radius:8px;background:{status_bg};border:1px solid {status_border};color:{status_color};font-size:13px;font-weight:600;white-space:normal;overflow-wrap:anywhere;">
+                {escape(status_text)}
+              </div>
+            </td>
+            <td width="28%" style="width:28%;padding:2px 0;vertical-align:middle;">
+              <div style="box-sizing:border-box;width:100%;text-align:center;padding:7px 3px;border-radius:8px;background:#fff4cc;border:1px solid #ffe69a;color:#8b4513;font-size:13px;font-weight:700;white-space:nowrap;">{fare_html or "—"}</div>
+            </td>
+          </tr>""")
+
+    details = []
+    if departure:
+        details.append(f"Departs {departure}")
+    if arrival:
+        details.append(f"Arrives {arrival}")
+    if duration:
+        details.append(f"Duration {duration}")
+    details_html = " &middot; ".join(escape(part) for part in details)
 
     return f"""
     <tr>
-      <td style="padding:14px 18px;border-bottom:1px solid #eceef1;">
-        <div style="font-size:15px;font-weight:600;color:#1a1d23;">{new_badge}{train_name} ({train_no})</div>
-        <div style="font-size:13px;color:#5a6472;margin-top:2px;">Class {cls} &middot; Departs {departure}</div>
-        <div style="margin-top:8px;">{chip}</div>
+      <td style="padding:12px 10px;border-bottom:1px solid #eceef1;">
+        <div style="font-size:15px;font-weight:700;color:#1a1d23;">{new_badge}{train_name} ({train_no})</div>
+        <div style="font-size:13px;color:#5a6472;margin-top:4px;">{details_html}</div>
+        <table role="presentation" cellpadding="0" cellspacing="0" style="margin-top:7px;border-collapse:collapse;width:100%;table-layout:fixed;">
+          {''.join(class_rows)}
+        </table>
       </td>
     </tr>"""
+
+
+def _group_train_items(items: List[dict]) -> List[dict]:
+    """Combine class-level snapshots into one email row per train instance."""
+    grouped = {}
+    ordered_keys = []
+    for item in items:
+        identity = (
+            str(item.get("train_no") or item.get("train_name") or "").strip().lower(),
+            str(item.get("from_station") or "").strip().upper(),
+            str(item.get("to_station") or "").strip().upper(),
+            str(item.get("availability_date") or "").strip(),
+        )
+        if identity not in grouped:
+            grouped[identity] = {**item, "classes": [item], "is_new": bool(item.get("is_new"))}
+            ordered_keys.append(identity)
+        else:
+            grouped[identity]["classes"].append(item)
+            grouped[identity]["is_new"] = grouped[identity]["is_new"] or bool(item.get("is_new"))
+            for field in ("departure_time", "arrival_time", "duration"):
+                if not grouped[identity].get(field) and item.get(field):
+                    grouped[identity][field] = item[field]
+    return [grouped[key] for key in ordered_keys]
 
 
 def _watch_section_html(watch_label: str, watch_url: str, items_html: str) -> str:
@@ -216,7 +315,8 @@ def build_digest_email(sections: List[Dict]) -> str:
         if section["type"] == "bus":
             items_html = "".join(_bus_item_html(i, section["watch_url"]) for i in section["items"])
         else:
-            items_html = "".join(_train_item_html(i, section["watch_url"]) for i in section["items"])
+            train_items = _group_train_items(section["items"])
+            items_html = "".join(_train_item_html(i, section["watch_url"]) for i in train_items)
         body_sections.append(
             _watch_section_html(section["watch_label"], section["watch_url"], items_html)
         )
@@ -231,16 +331,16 @@ def build_digest_email(sections: List[Dict]) -> str:
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f4f5f7;padding:24px 0;">
     <tr>
       <td align="center">
-        <table role="presentation" width="600" cellpadding="0" cellspacing="0"
-               style="background:#ffffff;border-radius:14px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.06);">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0"
+               style="width:100%;max-width:600px;background:#ffffff;border-radius:14px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.06);">
           <tr>
-            <td style="background:linear-gradient(135deg,#0f62d6 0%,#7c3aed 100%);padding:28px 24px;">
+            <td style="background:linear-gradient(135deg,#0f62d6 0%,#7c3aed 100%);padding:24px 18px;">
               <div style="font-size:20px;font-weight:700;color:#ffffff;">Seats just opened up \U0001F68C\U0001F686</div>
               <div style="font-size:13px;color:#e4e9ff;margin-top:4px;">RedRail availability alert &middot; {timestamp}</div>
             </td>
           </tr>
           <tr>
-            <td style="padding:6px 24px 24px 24px;">
+            <td style="padding:6px 14px 20px 14px;">
               <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
                 {sections_html}
               </table>

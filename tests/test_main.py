@@ -116,8 +116,10 @@ def test_train_watch_uses_train_fetcher_and_status_text():
     states = {}
     sent = []
 
-    def fake_fetch_train(source, destination, date, classes):
+    def fake_fetch_train(source, destination, date, classes, train_number=None, train_name=None):
         assert classes == ["SL"]
+        assert train_number is None
+        assert train_name is None
         return {"12007_SL": {"train_name": "Test Exp", "train_no": "12007", "class": "SL",
                               "status_text": "AVAILABLE 10", "departure_time": "06:00"}}
 
