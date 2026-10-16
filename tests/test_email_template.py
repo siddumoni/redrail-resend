@@ -175,3 +175,44 @@ def test_bus_item_no_day_offset_suffix_in_arrival():
     html = build_digest_email(sections)
     assert "+1d" not in html
     assert "05:50" in html
+
+
+
+def test_train_row_shows_arrival_and_journey_duration():
+    sections = [{
+        "watch_label": "Chennai to Coimbatore",
+        "watch_url": "https://example.com",
+        "type": "train",
+        "items": [{
+            "train_name": "Cbe VandeBharat", "train_no": "20643", "class": "CC",
+            "status_text": "AVAILABLE 227", "departure_time": "14:15",
+            "arrival_time": "20:05", "duration": "05:50", "is_new": True,
+        }],
+    }]
+    html = build_digest_email(sections)
+    assert "Departs 14:15" in html
+    assert "Arrives 20:05" in html
+    assert "Journey 5h 50m" in html
+
+
+def test_multiple_classes_for_same_train_are_rendered_in_one_row():
+    sections = [{
+        "watch_label": "Chennai to Coimbatore",
+        "watch_url": "https://example.com",
+        "type": "train",
+        "items": [
+            {"train_name": "Cbe VandeBharat", "train_no": "20643", "class": "CC",
+             "status_text": "Available 227", "departure_time": "14:15", "arrival_time": "20:05",
+             "duration": "05:50", "from_station": "MAS", "to_station": "CBE",
+             "availability_date": "10-12-2026", "is_new": False},
+            {"train_name": "Cbe VandeBharat", "train_no": "20643", "class": "EC",
+             "status_text": "Available 12", "departure_time": "14:15", "arrival_time": "20:05",
+             "duration": "05:50", "from_station": "MAS", "to_station": "CBE",
+             "availability_date": "10-12-2026", "is_new": True},
+        ],
+    }]
+    html = build_digest_email(sections)
+    assert html.count("Cbe VandeBharat (20643)") == 1
+    assert "CC: Available 227" in html
+    assert "EC: Available 12" in html
+    assert html.count("NEW</span>") == 1
