@@ -66,15 +66,28 @@ def _rating_badge(rating, reviews) -> str:
     )
 
 
-def _format_duration(minutes) -> str:
-    if minutes is None:
+def _format_duration(value) -> str:
+    """Format numeric minutes or API duration strings such as 05:45 / 5h 45m."""
+    if value is None or value == "":
         return ""
+    if isinstance(value, str):
+        raw = value.strip()
+        match = __import__("re").fullmatch(r"(\d{1,3}):(\d{2})", raw)
+        if match:
+            hours, minutes = int(match.group(1)), int(match.group(2))
+            return f"{hours}h" if minutes == 0 else (f"{hours}h {minutes}m" if hours else f"{minutes}m")
+        match = __import__("re").fullmatch(r"(?:(\d+)\s*h)?\s*(?:(\d+)\s*m)?", raw.lower())
+        if match and (match.group(1) or match.group(2)):
+            hours, minutes = int(match.group(1) or 0), int(match.group(2) or 0)
+            return f"{hours}h" if minutes == 0 and hours else (f"{hours}h {minutes}m" if hours else f"{minutes}m")
     try:
-        total_min = int(minutes)
+        total_minutes = int(value)
     except (TypeError, ValueError):
         return ""
-    h, m = divmod(total_min, 60)
-    return f"{h}h {m}m"
+    if total_minutes < 0:
+        return ""
+    hours, minutes = divmod(total_minutes, 60)
+    return f"{hours}h" if minutes == 0 else (f"{hours}h {minutes}m" if hours else f"{minutes}m")
 
 
 def _chip(text: str, level: str) -> str:
@@ -162,23 +175,68 @@ def _bus_item_html(item: dict, booking_url: str) -> str:
 
 
 def _train_item_html(item: dict, booking_url: str) -> str:
-    train_name = escape(item.get("train_name", ""))
-    train_no = escape(item.get("train_no", ""))
-    cls = escape(item.get("class", ""))
-    status_text = item.get("status_text", "")
-    departure = escape(item.get("departure_time", ""))
+    train_name = escape(str(item.get("train_name", "")))
+    train_no = escape(str(item.get("train_no", "")))
+    departure = escape(str(item.get("departure_time", "")))
+    arrival = escape(str(item.get("arrival_time", "")))
+    duration = _format_duration(item.get("duration"))
+    if not duration:
+        duration = _format_duration(item.get("duration_min"))
     new_badge = _new_badge() if item.get("is_new") else ""
 
-    chip = _chip(status_text or "Available", _chip_level_for_status(status_text or ""))
+    classes = item.get("classes")
+    if not isinstance(classes, list):
+        classes = [item]
+    class_chips = []
+    for class_item in classes:
+        class_code = escape(str(class_item.get("class", "")))
+        status_text = str(class_item.get("status_text") or "Availability unknown")
+        quota = str(class_item.get("quota") or "").strip()
+        label = f"{class_code}: {status_text}" if class_code else status_text
+        if quota and quota.upper() != "GN":
+            label += f" ({quota})"
+        class_chips.append(_chip(label, _chip_level_for_status(status_text)))
+
+    details = []
+    if departure:
+        details.append(f"Departs {departure}")
+    if arrival:
+        details.append(f"Arrives {arrival}")
+    if duration:
+        details.append(f"Journey {duration}")
+    details_html = " &middot; ".join(escape(part) for part in details)
 
     return f"""
     <tr>
       <td style="padding:14px 18px;border-bottom:1px solid #eceef1;">
         <div style="font-size:15px;font-weight:600;color:#1a1d23;">{new_badge}{train_name} ({train_no})</div>
-        <div style="font-size:13px;color:#5a6472;margin-top:2px;">Class {cls} &middot; Departs {departure}</div>
-        <div style="margin-top:8px;">{chip}</div>
+        <div style="font-size:13px;color:#5a6472;margin-top:4px;">{details_html}</div>
+        <div style="margin-top:7px;">{''.join(class_chips)}</div>
       </td>
     </tr>"""
+
+
+def _group_train_items(items: List[dict]) -> List[dict]:
+    """Combine class-level snapshots into one email row per train instance."""
+    grouped = {}
+    ordered_keys = []
+    for item in items:
+        identity = (
+            str(item.get("train_no") or item.get("train_name") or "").strip().lower(),
+            str(item.get("from_station") or "").strip().upper(),
+            str(item.get("to_station") or "").strip().upper(),
+            str(item.get("availability_date") or "").strip(),
+        )
+        if identity not in grouped:
+            grouped[identity] = {**item, "classes": [item], "is_new": bool(item.get("is_new"))}
+            ordered_keys.append(identity)
+        else:
+            grouped[identity]["classes"].append(item)
+            grouped[identity]["is_new"] = grouped[identity]["is_new"] or bool(item.get("is_new"))
+            for field in ("departure_time", "arrival_time", "duration"):
+                if not grouped[identity].get(field) and item.get(field):
+                    grouped[identity][field] = item[field]
+    return [grouped[key] for key in ordered_keys]
 
 
 def _watch_section_html(watch_label: str, watch_url: str, items_html: str) -> str:
@@ -216,7 +274,8 @@ def build_digest_email(sections: List[Dict]) -> str:
         if section["type"] == "bus":
             items_html = "".join(_bus_item_html(i, section["watch_url"]) for i in section["items"])
         else:
-            items_html = "".join(_train_item_html(i, section["watch_url"]) for i in section["items"])
+            train_items = _group_train_items(section["items"])
+            items_html = "".join(_train_item_html(i, section["watch_url"]) for i in train_items)
         body_sections.append(
             _watch_section_html(section["watch_label"], section["watch_url"], items_html)
         )
