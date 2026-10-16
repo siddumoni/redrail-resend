@@ -223,16 +223,16 @@ def _train_item_html(item: dict, booking_url: str) -> str:
         fare_html = escape(_format_train_fare(class_item.get("price")))
         class_rows.append(f"""
           <tr>
-            <td width="72" style="width:72px;padding:2px 6px 2px 0;vertical-align:middle;">
-              <div style="box-sizing:border-box;width:72px;text-align:center;padding:7px 4px;border-radius:8px;background:#eef0f2;border:1px solid #e0e3e7;color:#3f4a59;font-size:13px;font-weight:700;">{class_code}</div>
+            <td width="20%" style="width:20%;padding:2px 6px 2px 0;vertical-align:middle;">
+              <div style="box-sizing:border-box;width:100%;text-align:center;padding:7px 3px;border-radius:8px;background:#eef0f2;border:1px solid #e0e3e7;color:#3f4a59;font-size:13px;font-weight:700;">{class_code}</div>
             </td>
-            <td width="170" style="width:170px;padding:2px 8px 2px 0;vertical-align:middle;">
-              <div style="box-sizing:border-box;width:170px;padding:7px 9px;border-radius:8px;background:{status_bg};border:1px solid {status_border};color:{status_color};font-size:13px;font-weight:600;white-space:nowrap;">
+            <td width="52%" style="width:52%;padding:2px 6px 2px 0;vertical-align:middle;">
+              <div style="box-sizing:border-box;width:100%;padding:7px 7px;border-radius:8px;background:{status_bg};border:1px solid {status_border};color:{status_color};font-size:13px;font-weight:600;white-space:normal;overflow-wrap:anywhere;">
                 {escape(status_text)}
               </div>
             </td>
-            <td width="104" style="width:104px;padding:2px 0;vertical-align:middle;">
-              <div style="box-sizing:border-box;width:104px;text-align:center;padding:7px 6px;border-radius:8px;background:#fff4cc;border:1px solid #ffe69a;color:#8b4513;font-size:13px;font-weight:700;white-space:nowrap;">{fare_html or "—"}</div>
+            <td width="28%" style="width:28%;padding:2px 0;vertical-align:middle;">
+              <div style="box-sizing:border-box;width:100%;text-align:center;padding:7px 3px;border-radius:8px;background:#fff4cc;border:1px solid #ffe69a;color:#8b4513;font-size:13px;font-weight:700;white-space:nowrap;">{fare_html or "—"}</div>
             </td>
           </tr>""")
 
@@ -247,10 +247,10 @@ def _train_item_html(item: dict, booking_url: str) -> str:
 
     return f"""
     <tr>
-      <td style="padding:12px 14px;border-bottom:1px solid #eceef1;">
+      <td style="padding:12px 10px;border-bottom:1px solid #eceef1;">
         <div style="font-size:15px;font-weight:700;color:#1a1d23;">{new_badge}{train_name} ({train_no})</div>
         <div style="font-size:13px;color:#5a6472;margin-top:4px;">{details_html}</div>
-        <table role="presentation" cellpadding="0" cellspacing="0" style="margin-top:7px;border-collapse:collapse;width:auto;">
+        <table role="presentation" cellpadding="0" cellspacing="0" style="margin-top:7px;border-collapse:collapse;width:100%;table-layout:fixed;">
           {''.join(class_rows)}
         </table>
       </td>
@@ -331,16 +331,16 @@ def build_digest_email(sections: List[Dict]) -> str:
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f4f5f7;padding:24px 0;">
     <tr>
       <td align="center">
-        <table role="presentation" width="600" cellpadding="0" cellspacing="0"
-               style="background:#ffffff;border-radius:14px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.06);">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0"
+               style="width:100%;max-width:600px;background:#ffffff;border-radius:14px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.06);">
           <tr>
-            <td style="background:linear-gradient(135deg,#0f62d6 0%,#7c3aed 100%);padding:28px 24px;">
+            <td style="background:linear-gradient(135deg,#0f62d6 0%,#7c3aed 100%);padding:24px 18px;">
               <div style="font-size:20px;font-weight:700;color:#ffffff;">Seats just opened up \U0001F68C\U0001F686</div>
               <div style="font-size:13px;color:#e4e9ff;margin-top:4px;">RedRail availability alert &middot; {timestamp}</div>
             </td>
           </tr>
           <tr>
-            <td style="padding:6px 24px 24px 24px;">
+            <td style="padding:6px 14px 20px 14px;">
               <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
                 {sections_html}
               </table>
