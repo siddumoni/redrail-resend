@@ -192,7 +192,7 @@ def test_train_row_shows_arrival_and_journey_duration():
     html = build_digest_email(sections)
     assert "Departs 14:15" in html
     assert "Arrives 20:05" in html
-    assert "Journey 5h 50m" in html
+    assert "Duration 5h 50m" in html
 
 
 def test_multiple_classes_for_same_train_are_rendered_in_one_row():
@@ -213,8 +213,8 @@ def test_multiple_classes_for_same_train_are_rendered_in_one_row():
     }]
     html = build_digest_email(sections)
     assert html.count("Cbe VandeBharat (20643)") == 1
-    assert "CC: Available 227" in html
-    assert "EC: Available 12" in html
+    assert "CC</div>" in html and "Available 227" in html
+    assert "EC</div>" in html and "Available 12" in html
     assert html.count("NEW</span>") == 1
 
 
@@ -234,5 +234,38 @@ def test_train_fare_is_displayed_per_class():
         ],
     }]
     html = build_digest_email(sections)
-    assert "CC: Available 227 · ₹1,250" in html
-    assert "EC: Available 12 · ₹2,400" in html
+    assert "CC</div>" in html and "Available 227" in html and "₹1,250" in html
+    assert "EC</div>" in html and "Available 12" in html and "₹2,400" in html
+
+
+
+def test_train_classes_status_and_fare_use_compact_aligned_columns():
+    sections = [{
+        "watch_label": "Chennai to Coimbatore",
+        "watch_url": "https://example.com",
+        "type": "train",
+        "items": [
+            {"train_name": "Example Express", "train_no": "12345", "class": "SL",
+             "status_text": "Available 91", "price": 340, "from_station": "MAS",
+             "to_station": "CBE", "availability_date": "13-12-2026"},
+            {"train_name": "Example Express", "train_no": "12345", "class": "3A",
+             "status_text": "RAC 42", "price": 935, "from_station": "MAS",
+             "to_station": "CBE", "availability_date": "13-12-2026"},
+            {"train_name": "Example Express", "train_no": "12345", "class": "2A",
+             "status_text": "WL 18", "price": 1285, "from_station": "MAS",
+             "to_station": "CBE", "availability_date": "13-12-2026"},
+            {"train_name": "Example Express", "train_no": "12345", "class": "1A",
+             "status_text": "PQ 23", "price": 2115, "from_station": "MAS",
+             "to_station": "CBE", "availability_date": "13-12-2026"},
+        ],
+    }]
+    html = build_digest_email(sections)
+    assert "width:72px" in html
+    assert "width:170px" in html
+    assert "width:104px" in html
+    assert "background:#eef0f2" in html  # grey class box
+    assert "background:#e8f6ed" in html  # Available
+    assert "background:#fff0e2" in html  # RAC
+    assert "background:#ffeaed" in html  # WL
+    assert "background:#eef0f3" in html  # PQ
+    assert "₹340" in html and "₹935" in html and "₹1,285" in html and "₹2,115" in html
