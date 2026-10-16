@@ -216,3 +216,23 @@ def test_multiple_classes_for_same_train_are_rendered_in_one_row():
     assert "CC: Available 227" in html
     assert "EC: Available 12" in html
     assert html.count("NEW</span>") == 1
+
+
+
+def test_train_fare_is_displayed_per_class():
+    sections = [{
+        "watch_label": "Chennai to Coimbatore",
+        "watch_url": "https://example.com",
+        "type": "train",
+        "items": [
+            {"train_name": "Cbe VandeBharat", "train_no": "20643", "class": "CC",
+             "status_text": "Available 227", "price": 1250, "from_station": "MAS",
+             "to_station": "CBE", "availability_date": "10-12-2026"},
+            {"train_name": "Cbe VandeBharat", "train_no": "20643", "class": "EC",
+             "status_text": "Available 12", "price": 2400, "from_station": "MAS",
+             "to_station": "CBE", "availability_date": "10-12-2026"},
+        ],
+    }]
+    html = build_digest_email(sections)
+    assert "CC: Available 227 · ₹1,250" in html
+    assert "EC: Available 12 · ₹2,400" in html
