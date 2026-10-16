@@ -2065,5 +2065,29 @@
     },
     "last_success_ts": "2026-10-16T11:17:39.562780+00:00",
     "watch_id": "train:chennai:coimbatore:2026-11-24:sl"
+  },
+  "train:chennai:coimbatore:2026-11-25:sl": {
+    "consecutive_failures": 0,
+    "last_alert_ts": null,
+    "last_snapshots": {
+      "12685_mas_ptj_sl_gn": {
+        "arrival_time": "23:44",
+        "availability_date": "25-11-2026",
+        "available": 4,
+        "class": "SL",
+        "departure_time": "16:20",
+        "duration": "07:24",
+        "from_station": "MAS",
+        "last_updated": "14 days ago",
+        "price": 400,
+        "quota": "GN",
+        "status_text": "Available 4",
+        "to_station": "PTJ",
+        "train_name": "Mas Maq Sf Exp",
+        "train_no": "12685"
+      }
+    },
+    "last_success_ts": "2026-10-16T11:29:06.252678+00:00",
+    "watch_id": "train:chennai:coimbatore:2026-11-25:sl"
   }
 }
