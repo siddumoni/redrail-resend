@@ -3,6 +3,9 @@ name: Python tests
 on:
   pull_request:
     branches: [main]
+  push:
+    branches: ["**"]
+  workflow_dispatch:
 
 permissions:
   contents: read
