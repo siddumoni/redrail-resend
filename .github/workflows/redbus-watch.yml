@@ -1,7 +1,7 @@
-name: RedBus Availability Watcher
+name: RedRail Train Availability Watcher
 
 on:
-  workflow_dispatch:  # allows manual "Run workflow" button for testing
+  workflow_dispatch:
 
 permissions:
   contents: write  # needed to commit state.json back to the repo
@@ -35,7 +35,7 @@ jobs:
           path: ~/.cache/ms-playwright
           key: playwright-${{ runner.os }}-${{ hashFiles('requirements.txt') }}
 
-      - name: Install Playwright Chromium
+      - name: Install Playwright Chromium and system dependencies
         if: steps.playwright-cache.outputs.cache-hit != 'true'
         run: python -m playwright install --with-deps chromium
 
@@ -44,9 +44,9 @@ jobs:
 
       - name: Diagnose connectivity to redbus.in
         run: |
-          echo "Testing plain HTTP reachability from this runner's IP..."
-          curl -v --max-time 15 -o /dev/null -w "\nHTTP status: %{http_code}\nTotal time: %{time_total}s\n" https://www.redbus.in || echo "curl FAILED - likely blocked at network level"
-        continue-on-error: true  # diagnostic only - don't fail the job on this
+          echo "Testing HTTPS reachability from this runner..."
+          curl -sS -L --max-time 15 -o /dev/null -w "HTTP status: %{http_code}\nTotal time: %{time_total}s\n" https://www.redbus.in || echo "curl FAILED - likely blocked at network level"
+        continue-on-error: true
 
       - name: Run watcher
         env:
@@ -55,12 +55,9 @@ jobs:
           RESEND_FROM: ${{ secrets.RESEND_FROM }}
           RESEND_TO: ${{ secrets.RESEND_TO }}
           REDBUS_FAIL_THRESHOLD: "3"
-          # Run "headed" (not headless) inside a virtual display. Akamai
-          # Bot Manager (confirmed active on redbus.in via _abck/bm_sz
-          # cookies) commonly flags headless=True as a bot signal - a
-          # headed session under xvfb looks much closer to a real browser
-          # even though nothing is actually visible on this CI runner.
+          # Headed Chromium inside a virtual display; matches the successful local mode.
           REDBUS_HEADLESS: "false"
+          REDBUS_DISABLE_HTTP2: "false"
         run: xvfb-run -a python -m redbus_watch.main
 
       - name: Commit updated state
