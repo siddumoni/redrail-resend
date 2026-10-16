@@ -103,7 +103,7 @@ def run_once(
             if failures >= fail_threshold:
                 try:
                     send_email_fn(
-                        f"[RedBus Watcher] Repeated failures: {watch.label}",
+                        f"[RedRail Watcher] Repeated failures: {watch.label}",
                         build_failure_alert_email(watch.label, failures, fail_threshold),
                     )
                     summary["failure_alerts_sent"].append(wid)
@@ -135,7 +135,7 @@ def run_once(
     if digest_sections:
         route_count = len(digest_sections)
         subject = (
-            f"[RedBus Watcher] Seats available on {route_count} watch"
+            f"[RedRail Watcher] Seats available on {route_count} watch"
             f"{'es' if route_count != 1 else ''}!"
         )
         html = build_digest_email(digest_sections)
