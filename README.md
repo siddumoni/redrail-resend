@@ -40,7 +40,6 @@ The scraper uses RedBus website endpoints through a Playwright browser session. 
 │   └── workflows/
 │       ├── redbus-watch.yml   # Train availability watcher (legacy filename)
 │       └── tests.yml          # Unit tests on pushes, PRs and manual dispatch
-├── redrail_watch/             # Train watcher package, if present in this checkout
 ├── redbus_watch/
 │   ├── config.py              # Watch configuration parsing and validation
 │   ├── scraper_train.py       # Train search and availability normalization
