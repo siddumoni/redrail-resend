@@ -174,6 +174,30 @@ def _bus_item_html(item: dict, booking_url: str) -> str:
     </tr>"""
 
 
+def _train_status_style(status_text: str):
+    """Return semantic colors for railway availability statuses."""
+    status = str(status_text or "").strip().upper()
+    if status.startswith("AVAILABLE"):
+        return "#16834a", "#e8f6ed", "#cfead8"
+    if status.startswith("RAC"):
+        return "#c45100", "#fff0e2", "#ffdfc2"
+    if status.startswith("WL") or "WAITING" in status:
+        return "#c62828", "#ffeaed", "#ffd1d8"
+    if status.startswith("PQ") or status.startswith("REGRET") or status.startswith("NOT AVAILABLE"):
+        return "#566171", "#eef0f3", "#dfe3e8"
+    return "#566171", "#f2f3f5", "#e1e4e8"
+
+
+def _format_train_fare(value):
+    if value in (None, ""):
+        return ""
+    try:
+        amount = float(str(value).replace(",", "").replace("₹", "").strip())
+        return f"₹{amount:,.0f}"
+    except (TypeError, ValueError):
+        return f"₹{escape(str(value))}"
+
+
 def _train_item_html(item: dict, booking_url: str) -> str:
     train_name = escape(str(item.get("train_name", "")))
     train_no = escape(str(item.get("train_no", "")))
@@ -187,23 +211,30 @@ def _train_item_html(item: dict, booking_url: str) -> str:
     classes = item.get("classes")
     if not isinstance(classes, list):
         classes = [item]
-    class_chips = []
+
+    class_rows = []
     for class_item in classes:
-        class_code = escape(str(class_item.get("class", "")))
+        class_code = escape(str(class_item.get("class", "—") or "—"))
         status_text = str(class_item.get("status_text") or "Availability unknown")
         quota = str(class_item.get("quota") or "").strip()
-        label = f"{class_code}: {status_text}" if class_code else status_text
         if quota and quota.upper() != "GN":
-            label += f" ({quota})"
-        fare = class_item.get("price")
-        if fare not in (None, ""):
-            try:
-                fare_value = float(str(fare).replace(",", "").replace("₹", "").strip())
-                label += f" · ₹{fare_value:,.0f}"
-            except (TypeError, ValueError):
-                # Preserve a non-numeric fare supplied by the source rather than dropping it.
-                label += f" · ₹{fare}"
-        class_chips.append(_chip(label, _chip_level_for_status(status_text)))
+            status_text = f"{status_text} ({quota})"
+        status_color, status_bg, status_border = _train_status_style(status_text)
+        fare_html = escape(_format_train_fare(class_item.get("price")))
+        class_rows.append(f"""
+          <tr>
+            <td width="72" style="width:72px;padding:2px 6px 2px 0;vertical-align:middle;">
+              <div style="box-sizing:border-box;width:72px;text-align:center;padding:7px 4px;border-radius:8px;background:#eef0f2;border:1px solid #e0e3e7;color:#3f4a59;font-size:13px;font-weight:700;">{class_code}</div>
+            </td>
+            <td width="170" style="width:170px;padding:2px 8px 2px 0;vertical-align:middle;">
+              <div style="box-sizing:border-box;width:170px;padding:7px 9px;border-radius:8px;background:{status_bg};border:1px solid {status_border};color:{status_color};font-size:13px;font-weight:600;white-space:nowrap;">
+                {escape(status_text)}
+              </div>
+            </td>
+            <td width="104" style="width:104px;padding:2px 0;vertical-align:middle;">
+              <div style="box-sizing:border-box;width:104px;text-align:center;padding:7px 6px;border-radius:8px;background:#fff4cc;border:1px solid #ffe69a;color:#8b4513;font-size:13px;font-weight:700;white-space:nowrap;">{fare_html or "—"}</div>
+            </td>
+          </tr>""")
 
     details = []
     if departure:
@@ -211,15 +242,17 @@ def _train_item_html(item: dict, booking_url: str) -> str:
     if arrival:
         details.append(f"Arrives {arrival}")
     if duration:
-        details.append(f"Journey {duration}")
+        details.append(f"Duration {duration}")
     details_html = " &middot; ".join(escape(part) for part in details)
 
     return f"""
     <tr>
-      <td style="padding:14px 18px;border-bottom:1px solid #eceef1;">
-        <div style="font-size:15px;font-weight:600;color:#1a1d23;">{new_badge}{train_name} ({train_no})</div>
+      <td style="padding:12px 14px;border-bottom:1px solid #eceef1;">
+        <div style="font-size:15px;font-weight:700;color:#1a1d23;">{new_badge}{train_name} ({train_no})</div>
         <div style="font-size:13px;color:#5a6472;margin-top:4px;">{details_html}</div>
-        <div style="margin-top:7px;">{''.join(class_chips)}</div>
+        <table role="presentation" cellpadding="0" cellspacing="0" style="margin-top:7px;border-collapse:collapse;width:auto;">
+          {''.join(class_rows)}
+        </table>
       </td>
     </tr>"""
 
