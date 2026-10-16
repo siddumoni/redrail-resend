@@ -236,7 +236,7 @@ def build_digest_email(sections: List[Dict]) -> str:
           <tr>
             <td style="background:linear-gradient(135deg,#0f62d6 0%,#7c3aed 100%);padding:28px 24px;">
               <div style="font-size:20px;font-weight:700;color:#ffffff;">Seats just opened up \U0001F68C\U0001F686</div>
-              <div style="font-size:13px;color:#e4e9ff;margin-top:4px;">RedBus availability alert &middot; {timestamp}</div>
+              <div style="font-size:13px;color:#e4e9ff;margin-top:4px;">RedRail availability alert &middot; {timestamp}</div>
             </td>
           </tr>
           <tr>
@@ -249,7 +249,7 @@ def build_digest_email(sections: List[Dict]) -> str:
           <tr>
             <td style="padding:16px 24px;background:#f9fafb;border-top:1px solid #eceef1;">
               <div style="font-size:12px;color:#8a94a3;">
-                You're receiving this because this route/date is in your RedBus watch list. Availability can change fast &mdash; book quickly once you get this.
+                You're receiving this because this route/date is in your RedRail watch list. Availability can change fast &mdash; book quickly once you get this.
               </div>
             </td>
           </tr>
