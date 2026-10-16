@@ -5345,5 +5345,93 @@
     },
     "last_success_ts": "2026-10-16T16:46:48.752894+00:00",
     "watch_id": "train:chennai:coimbatore:2026-12-15:3a,sl"
+  },
+  "train:chennai:coimbatore:2026-12-16:3a,sl": {
+    "consecutive_failures": 0,
+    "last_alert_ts": null,
+    "last_snapshots": {
+      "12521_mas_cbe_3a_gn": {
+        "arrival_time": "06:42",
+        "availability_date": "16-12-2026",
+        "available": 0,
+        "class": "3A",
+        "departure_time": "23:10",
+        "duration": "07:32",
+        "from_station": "MAS",
+        "last_updated": "1 day ago",
+        "price": 855,
+        "quota": "GN",
+        "status_text": "RLWL 8",
+        "to_station": "CBE",
+        "train_name": "Rapti Sagar Exp",
+        "train_no": "12521"
+      },
+      "12521_mas_cbe_sl_gn": {
+        "arrival_time": "06:42",
+        "availability_date": "16-12-2026",
+        "available": 43,
+        "class": "SL",
+        "departure_time": "23:10",
+        "duration": "07:32",
+        "from_station": "MAS",
+        "last_updated": "1 day ago",
+        "price": 400,
+        "quota": "GN",
+        "status_text": "Available 43",
+        "to_station": "CBE",
+        "train_name": "Rapti Sagar Exp",
+        "train_no": "12521"
+      },
+      "13351_mas_cbe_3a_gn": {
+        "arrival_time": "08:02",
+        "availability_date": "16-12-2026",
+        "available": 46,
+        "class": "3A",
+        "departure_time": "23:45",
+        "duration": "08:17",
+        "from_station": "MAS",
+        "last_updated": "15 hr ago",
+        "price": 1420,
+        "quota": "GN",
+        "status_text": "Available 46",
+        "to_station": "CBE",
+        "train_name": "Dhn Alappuzha Ex",
+        "train_no": "13351"
+      },
+      "13351_mas_cbe_sl_gn": {
+        "arrival_time": "08:02",
+        "availability_date": "16-12-2026",
+        "available": 14,
+        "class": "SL",
+        "departure_time": "23:45",
+        "duration": "08:17",
+        "from_station": "MAS",
+        "last_updated": "10 hr ago",
+        "price": 355,
+        "quota": "GN",
+        "status_text": "Available 14",
+        "to_station": "CBE",
+        "train_name": "Dhn Alappuzha Ex",
+        "train_no": "13351"
+      },
+      "18189_per_ptj_3a_gn": {
+        "arrival_time": "21:29",
+        "availability_date": "16-12-2026",
+        "available": 0,
+        "class": "3A",
+        "departure_time": "12:25",
+        "duration": "09:04",
+        "from_station": "PER",
+        "last_updated": "9 hr ago",
+        "price": 795,
+        "quota": "GN",
+        "status_text": "RLWL 1",
+        "to_station": "PTJ",
+        "train_name": "Tata Ers Exp",
+        "train_no": "18189"
+      }
+    },
+    "last_success_ts": "2026-10-16T16:48:13.854313+00:00",
+    "watch_id": "train:chennai:coimbatore:2026-12-16:3a,sl"
   }
 }
