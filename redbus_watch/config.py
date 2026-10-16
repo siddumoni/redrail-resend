@@ -77,6 +77,8 @@ class Watch:
     seat_type: str = "any"
     classes: Optional[List[str]] = None
     operators: Optional[List[str]] = None
+    train_number: Optional[str] = None
+    train_name: Optional[str] = None
 
     def watch_id(self) -> str:
         """Stable identifier used as the state-file key for this watch."""
@@ -151,6 +153,15 @@ def _validate_entry(raw: dict, idx: int) -> List[Watch]:
 
     operators = _extract_operators(raw, idx)
     date_values = _extract_dates(raw, idx)
+    train_number = raw.get("train_number")
+    train_name = raw.get("train_name")
+
+    if watch_type == "train":
+        train_number = str(train_number).strip() if train_number else None
+        train_name = str(train_name).strip() if train_name else None
+    else:
+        train_number = None
+        train_name = None
 
     source = str(raw["source"]).strip()
     destination = str(raw["destination"]).strip()
@@ -172,6 +183,8 @@ def _validate_entry(raw: dict, idx: int) -> List[Watch]:
             seat_type=seat_type,
             classes=classes,
             operators=operators,
+            train_number=train_number,
+            train_name=train_name,
         ))
 
     return watches
