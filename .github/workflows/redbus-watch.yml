@@ -2,6 +2,8 @@ name: RedRail Train Availability Watcher
 
 on:
   workflow_dispatch:
+  schedule:
+    - cron: "*/30 * * * *"
 
 permissions:
   contents: write  # needed to commit state.json back to the repo
