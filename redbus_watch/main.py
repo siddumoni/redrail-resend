@@ -122,11 +122,64 @@ def run_once(
         meta_entry = fresh.pop("__meta__", None)
         city_ids = meta_entry.get("city_ids") if meta_entry else None
 
+        # Detect numeric train availability-count changes as well as newly
+        # available classes. Only compare explicit counts in status_text
+        # (e.g. "Available 250" -> "Available 230"); generic "Available"
+        # statuses do not provide a reliable count and are ignored.
+        previous = states.get(wid)
+        previous_snapshots = previous.last_snapshots if previous else {}
+        count_changes = []
+        if watch.type == "train":
+            import re
+            for key, item in fresh.items():
+                previous_item = previous_snapshots.get(key, {})
+                previous_status = str(previous_item.get("status_text") or "")
+                current_status = str(item.get("status_text") or "")
+                previous_match = re.search(r"\\bAVAILABLE\\s+(\\d+)\\b", previous_status, re.IGNORECASE)
+                current_match = re.search(r"\\bAVAILABLE\\s+(\\d+)\\b", current_status, re.IGNORECASE)
+                if previous_match and current_match:
+                    old_count = int(previous_match.group(1))
+                    new_count = int(current_match.group(1))
+                    if old_count != new_count:
+                        changed = dict(item)
+                        changed["is_new"] = False
+                        changed["availability_changed_from"] = old_count
+                        changed["availability_changed_to"] = new_count
+                        count_changes.append((key, changed))
+
         full_list = get_full_availability_with_new_flags(wid, fresh, states)
+        # Include changed-count entries even when the current status is no
+        # longer bookable, so a drop to zero can still be reported.
+        listed_keys = {item.get("_snapshot_key") for item in full_list}
+        full_list = [dict(item, _snapshot_key=key) for key, item in zip(
+            [k for k, v in fresh.items() if v.get("available", 0) > 0 or str(v.get("status_text") or "").upper().startswith(("AVAILABLE", "RAC"))],
+            full_list
+        )] if False else full_list
+        # Identify current items by their stable train number/class metadata.
+        for key, changed in count_changes:
+            if not any(
+                str(item.get("train_no", "")) == str(changed.get("train_no", ""))
+                and str(item.get("class", "")) == str(changed.get("class", ""))
+                and str(item.get("quota", "GN")) == str(changed.get("quota", "GN"))
+                for item in full_list
+            ):
+                full_list.append(changed)
+            else:
+                for item in full_list:
+                    if (
+                        str(item.get("train_no", "")) == str(changed.get("train_no", ""))
+                        and str(item.get("class", "")) == str(changed.get("class", ""))
+                        and str(item.get("quota", "GN")) == str(changed.get("quota", "GN"))
+                    ):
+                        item["availability_changed_from"] = changed["availability_changed_from"]
+                        item["availability_changed_to"] = changed["availability_changed_to"]
+                        break
+
         update_state_success(wid, fresh, states, now_iso)
 
         has_new = any(item.get("is_new") for item in full_list)
-        if has_new:
+        has_count_change = bool(count_changes)
+        if has_new or has_count_change:
             digest_sections.append({
                 "watch_label": watch.label,
                 "watch_url": _watch_url(watch, city_ids),
