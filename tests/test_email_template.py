@@ -287,3 +287,29 @@ def test_train_email_uses_fluid_layout_for_mobile_gmail():
     assert "max-width:600px" in html
     assert "table-layout:fixed" in html
     assert "overflow-wrap:anywhere" in html
+
+
+
+def test_seat_count_change_is_shown_only_for_the_class_that_changed():
+    sections = [{
+        "watch_label": "Chennai to Coimbatore",
+        "watch_url": "https://example.com",
+        "type": "train",
+        "items": [
+            {"train_name": "Cbe VandeBharat", "train_no": "20643", "class": "CC",
+             "status_text": "Available 224", "availability_changed_from": 227,
+             "availability_changed_to": 224, "price": 1385,
+             "from_station": "MAS", "to_station": "CBE",
+             "availability_date": "06-12-2026"},
+            {"train_name": "Cbe VandeBharat", "train_no": "20643", "class": "EC",
+             "status_text": "Available 7", "price": 2505,
+             "from_station": "MAS", "to_station": "CBE",
+             "availability_date": "06-12-2026"},
+        ],
+    }]
+    html = build_digest_email(sections)
+    assert html.count("Seats changed: 227 → 224") == 1
+    cc_row = html.split("CC</div>", 1)[1].split("</tr>", 1)[0]
+    ec_row = html.split("EC</div>", 1)[1].split("</tr>", 1)[0]
+    assert "Seats changed: 227 → 224" in cc_row
+    assert "Seats changed: 227 → 224" not in ec_row
