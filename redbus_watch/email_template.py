@@ -335,7 +335,7 @@ def build_digest_email(sections: List[Dict]) -> str:
                style="width:100%;max-width:600px;background:#ffffff;border-radius:14px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.06);">
           <tr>
             <td style="background:linear-gradient(135deg,#0f62d6 0%,#7c3aed 100%);padding:24px 18px;">
-              <div style="font-size:20px;font-weight:700;color:#ffffff;">Seats just opened up \U0001F68C\U0001F686</div>
+              <div style="font-size:20px;font-weight:700;color:#ffffff;">Train availability changed \U0001F686</div>
               <div style="font-size:13px;color:#e4e9ff;margin-top:4px;">RedRail availability alert &middot; {timestamp}</div>
             </td>
           </tr>
