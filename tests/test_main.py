@@ -329,3 +329,36 @@ def test_digest_send_success_still_reports_emailed_watches_normally():
     assert summary["digest_send_failed"] is False
     assert len(summary["emailed_watches"]) == 1
     assert len(sent) == 1
+
+
+def test_train_availability_count_change_sends_email():
+    watches = make_watches([{
+        "type": "train", "source": "MAS", "destination": "CBE",
+        "date": "2026-12-08", "classes": ["CC"],
+    }])
+    states = {}
+    sent = []
+
+    def fake_send(subject, html):
+        sent.append((subject, html))
+
+    def fetch_250(*args, **kwargs):
+        return {"train1_cc": {
+            "train_name": "Vande Bharat", "train_no": "20643",
+            "class": "CC", "quota": "GN", "available": 250,
+            "status_text": "AVAILABLE 250",
+        }}
+
+    def fetch_230(*args, **kwargs):
+        return {"train1_cc": {
+            "train_name": "Vande Bharat", "train_no": "20643",
+            "class": "CC", "quota": "GN", "available": 230,
+            "status_text": "AVAILABLE 230",
+        }}
+
+    run_once(watches, states, lambda *a, **k: {}, fetch_250, fake_send)
+    assert len(sent) == 1
+    run_once(watches, states, lambda *a, **k: {}, fetch_230, fake_send)
+    assert len(sent) == 2
+    assert "Seats changed: 250" in sent[1][1]
+    assert "230" in sent[1][1]
