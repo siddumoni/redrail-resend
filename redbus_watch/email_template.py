@@ -207,6 +207,9 @@ def _train_item_html(item: dict, booking_url: str) -> str:
     if not duration:
         duration = _format_duration(item.get("duration_min"))
     new_badge = _new_badge() if item.get("is_new") else ""
+    count_change = ""
+    if item.get("availability_changed_from") is not None and item.get("availability_changed_to") is not None:
+        count_change = f'<div style="font-size:11px;font-weight:700;margin-top:3px;color:#0f62d6;">Seats changed: {item["availability_changed_from"]} → {item["availability_changed_to"]}</div>'
 
     classes = item.get("classes")
     if not isinstance(classes, list):
@@ -228,7 +231,7 @@ def _train_item_html(item: dict, booking_url: str) -> str:
             </td>
             <td width="52%" style="width:52%;padding:2px 6px 2px 0;vertical-align:middle;">
               <div style="box-sizing:border-box;width:100%;padding:7px 7px;border-radius:8px;background:{status_bg};border:1px solid {status_border};color:{status_color};font-size:13px;font-weight:600;white-space:normal;overflow-wrap:anywhere;">
-                {escape(status_text)}
+                {escape(status_text)}{count_change}
               </div>
             </td>
             <td width="28%" style="width:28%;padding:2px 0;vertical-align:middle;">
