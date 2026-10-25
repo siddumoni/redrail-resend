@@ -150,11 +150,6 @@ def run_once(
         full_list = get_full_availability_with_new_flags(wid, fresh, states)
         # Include changed-count entries even when the current status is no
         # longer bookable, so a drop to zero can still be reported.
-        listed_keys = {item.get("_snapshot_key") for item in full_list}
-        full_list = [dict(item, _snapshot_key=key) for key, item in zip(
-            [k for k, v in fresh.items() if v.get("available", 0) > 0 or str(v.get("status_text") or "").upper().startswith(("AVAILABLE", "RAC"))],
-            full_list
-        )] if False else full_list
         # Identify current items by their stable train number/class metadata.
         for key, changed in count_changes:
             if not any(
