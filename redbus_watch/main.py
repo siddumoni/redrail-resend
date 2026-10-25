@@ -135,8 +135,8 @@ def run_once(
                 previous_item = previous_snapshots.get(key, {})
                 previous_status = str(previous_item.get("status_text") or "")
                 current_status = str(item.get("status_text") or "")
-                previous_match = re.search(r"\bAVAILABLE\s+(\\d+)\\b", previous_status, re.IGNORECASE)
-                current_match = re.search(r"\bAVAILABLE\s+(\\d+)\\b", current_status, re.IGNORECASE)
+                previous_match = re.search(r"\bAVAILABLE\s+(\d+)\b", previous_status, re.IGNORECASE)
+                current_match = re.search(r"\bAVAILABLE\s+(\d+)\b", current_status, re.IGNORECASE)
                 if previous_match and current_match:
                     old_count = int(previous_match.group(1))
                     new_count = int(current_match.group(1))
