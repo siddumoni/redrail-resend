@@ -14,7 +14,7 @@ The watcher runs in GitHub Actions and persists its last-known availability snap
 - **Clear availability styling:** distinct colours for Available, RAC, waiting list, quota-related and unavailable statuses.
 - **Class-specific fares:** show the fare returned for each class when available.
 - **Responsive email layout:** designed to adapt to desktop and mobile email clients.
-- **Change detection:** send an availability digest when a watched class becomes newly available rather than sending the same alert on every successful run.
+- **Change detection:** send an availability digest when a watched class becomes newly available. For train statuses with explicit numeric counts (for example, `AVAILABLE 250` → `AVAILABLE 230`), the watcher also detects count changes and includes the previous and current counts in the email.
 - **Failure alerts:** send a separate email after repeated consecutive fetch failures for a watch.
 - **Automated tests:** unit tests cover configuration, state transitions, train scraping/parsing, email rendering and watcher orchestration.
 
@@ -25,8 +25,8 @@ The scraper uses RedBus website endpoints through a Playwright browser session. 
 1. Load and validate the train-watch configuration from `REDBUS_WATCHES`.
 2. Load the previous availability snapshot from `state.json`.
 3. Fetch train availability for each configured route, date and class filter.
-4. Compare the current results with the saved snapshot.
-5. If a watched class becomes newly available, send a combined Resend email for the affected watch, with a `NEW` badge where appropriate.
+4. Compare the current results with the saved snapshot, including newly available classes and explicit numeric availability-count changes.
+5. Send a combined Resend email when a class becomes newly available or a numeric availability count changes. Newly available items receive a `NEW` badge; count changes show the previous and current values.
 6. Track consecutive fetch failures and send a separate failure alert when the configured threshold is reached.
 7. Save the updated snapshot to `state.json`.
 
@@ -71,16 +71,12 @@ In the repository, open **Settings → Secrets and variables → Actions** and c
 
 ### Run the watcher
 
-The watcher workflow is currently **manual-only**:
+The watcher workflow supports both scheduled checks and manual runs:
 
-1. Open the repository's **Actions** tab.
-2. Select **RedRail Train Availability Watcher**.
-3. Click **Run workflow** and choose the branch (normally `main`).
-4. Start the run and inspect its logs for the run summary or errors.
+- **Scheduled:** GitHub Actions is configured to run the watcher every 30 minutes (`*/30 * * * *`, UTC). GitHub may delay scheduled runs, and schedule availability can be affected by GitHub Actions service limits.
+- **Manual:** open the repository's **Actions** tab, select **RedRail Train Availability Watcher**, click **Run workflow**, choose the branch (normally `main`), and start the run.
 
 The workflow uses Python and Playwright to run the train watcher, then commits changes to `state.json`. The separate **Python tests** workflow runs the unit tests on pushes, pull requests targeting `main`, and manual dispatch.
-
-The watcher does **not** currently have a scheduled cron trigger. If periodic polling is desired, add a `schedule:` trigger to the existing watcher workflow deliberately and choose a conservative interval.
 
 ## Configure train watches
 
@@ -168,5 +164,5 @@ Unit tests use fixtures and fake fetchers where appropriate, so most tests do no
 
 - RedRail is a **train availability notification tool**, not a booking service. It does not reserve seats or purchase tickets.
 - The scraper uses undocumented website endpoints that may change without notice.
-- Keep polling conservative and respectful of the source website. Scheduled polling is not enabled in the current watcher workflow.
+- The scheduled watcher checks every 30 minutes. GitHub Actions schedules are not guaranteed to start at the exact minute, and the source website may throttle or block requests.
 - Protect Resend credentials. Never store secrets in `REDBUS_WATCHES`, source code, test fixtures or committed logs.
