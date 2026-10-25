@@ -4,7 +4,7 @@ RedRail is a Python-based **train availability watcher** for train searches on R
 
 RedRail is for train availability only. Bus monitoring is not part of this project's purpose. The repository currently uses the existing `REDBUS_WATCHES` GitHub Actions variable name for configuration; that variable should contain **train watches only**.
 
-The watcher runs in GitHub Actions and persists its last-known availability snapshot in `state.json`. This lets later runs compare current results with previous results instead of repeatedly sending the same availability alert.
+The watcher runs in GitHub Actions when you manually start it and persists its last-known availability snapshot in `state.json`. This lets later runs compare current results with previous results instead of repeatedly sending the same availability alert.
 
 ## Features
 
@@ -71,10 +71,7 @@ In the repository, open **Settings → Secrets and variables → Actions** and c
 
 ### Run the watcher
 
-The watcher workflow supports both scheduled checks and manual runs:
-
-- **Scheduled:** GitHub Actions is configured to run the watcher every 30 minutes (`*/30 * * * *`, UTC). GitHub may delay scheduled runs, and schedule availability can be affected by GitHub Actions service limits.
-- **Manual:** open the repository's **Actions** tab, select **RedRail Train Availability Watcher**, click **Run workflow**, choose the branch (normally `main`), and start the run.
+The watcher workflow is **manual-only**; it does not run on a schedule. To run it, open the repository's **Actions** tab, select **RedRail Train Availability Watcher**, click **Run workflow**, choose the branch (normally `main`), and start the run.
 
 The workflow uses Python and Playwright to run the train watcher, then commits changes to `state.json`. The separate **Python tests** workflow runs the unit tests on pushes, pull requests targeting `main`, and manual dispatch.
 
@@ -164,5 +161,5 @@ Unit tests use fixtures and fake fetchers where appropriate, so most tests do no
 
 - RedRail is a **train availability notification tool**, not a booking service. It does not reserve seats or purchase tickets.
 - The scraper uses undocumented website endpoints that may change without notice.
-- The scheduled watcher checks every 30 minutes. GitHub Actions schedules are not guaranteed to start at the exact minute, and the source website may throttle or block requests.
+- The watcher runs only when you manually trigger it. The source website may throttle or block requests.
 - Protect Resend credentials. Never store secrets in `REDBUS_WATCHES`, source code, test fixtures or committed logs.
