@@ -126,7 +126,8 @@ def test_train_watch_uses_train_fetcher_and_status_text():
     def fake_send(subject, html):
         sent.append((subject, html))
 
-    run_once(watches, states, lambda *a, **kw: {}, fake_fetch_train, fake_send)
+    run_once(watches, states, lambda *a, **kw: {}, fake_fetch_train, fake_send,
+             now_iso="2026-10-26T12:00:00+00:00")
     assert len(sent) == 1
     assert "Test Exp" in sent[0][1]
 
@@ -148,7 +149,8 @@ def test_multiple_watches_combine_into_one_digest_email():
     def fake_send(subject, html):
         sent.append((subject, html))
 
-    run_once(watches, states, fake_fetch_bus, fake_fetch_train, fake_send)
+    run_once(watches, states, fake_fetch_bus, fake_fetch_train, fake_send,
+             now_iso="2026-10-26T12:00:00+00:00")
     assert len(sent) == 1  # ONE combined digest, not two separate emails
     assert "2 watches" in sent[0][0]
 
@@ -356,9 +358,11 @@ def test_train_availability_count_change_sends_email():
             "status_text": "AVAILABLE 230",
         }}
 
-    run_once(watches, states, lambda *a, **k: {}, fetch_250, fake_send)
+    run_once(watches, states, lambda *a, **k: {}, fetch_250, fake_send,
+             now_iso="2026-10-26T12:00:00+00:00")
     assert len(sent) == 1
-    run_once(watches, states, lambda *a, **k: {}, fetch_230, fake_send)
+    run_once(watches, states, lambda *a, **k: {}, fetch_230, fake_send,
+             now_iso="2026-10-26T12:00:00+00:00")
     assert len(sent) == 2
     assert "Seats changed: 250" in sent[1][1]
     assert "230" in sent[1][1]
