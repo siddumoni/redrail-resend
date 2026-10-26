@@ -25,6 +25,7 @@ tested from a sandbox without live access.
 import os
 import sys
 from datetime import datetime, timezone
+from zoneinfo import ZoneInfo
 from typing import Callable, Dict, List, Optional
 
 from redbus_watch.config import Watch, ConfigError, load_watches_from_env
@@ -39,6 +40,15 @@ from redbus_watch.state import (
 from redbus_watch.email_template import build_digest_email, build_failure_alert_email
 
 FAIL_THRESHOLD_DEFAULT = 3
+INDIA_TZ = ZoneInfo("Asia/Kolkata")
+
+
+def _is_irctc_maintenance_window(now: datetime) -> bool:
+    """Return True during the daily 23:45–00:20 IST train-booking outage."""
+    local_now = now.astimezone(INDIA_TZ)
+    minute_of_day = local_now.hour * 60 + local_now.minute
+    # Window crosses midnight: 23:45 inclusive through 00:19:59 inclusive.
+    return minute_of_day >= (23 * 60 + 45) or minute_of_day < 20
 
 
 def _watch_url(watch: Watch, city_ids: Optional[dict] = None) -> str:
@@ -81,10 +91,15 @@ def run_once(
         "errors": {watch_id: error_message},
       }
     """
-    now_iso = now_iso or datetime.now(timezone.utc).isoformat()
+    now_dt = datetime.fromisoformat(now_iso) if now_iso else datetime.now(timezone.utc)
+    if now_dt.tzinfo is None:
+        now_dt = now_dt.replace(tzinfo=timezone.utc)
+    now_iso = now_iso or now_dt.isoformat()
+    maintenance_window = _is_irctc_maintenance_window(now_dt)
     summary = {
         "emailed_watches": [],
         "failed_watches": [],
+        "skipped_maintenance_watches": [],
         "failure_alerts_sent": [],
         "digest_send_failed": False,
         "errors": {},
@@ -94,6 +109,19 @@ def run_once(
 
     for watch in watches:
         wid = watch.watch_id()
+
+        # RedBus reports IRCTC's daily maintenance window as a non-standard
+        # train-search response. Skip train fetches during this known window:
+        # don't count it as a scraper failure, send failure alerts, or mutate
+        # the last-known availability snapshots. Bus watches continue normally.
+        if watch.type == "train" and maintenance_window:
+            summary["skipped_maintenance_watches"].append(wid)
+            summary["errors"][wid] = (
+                "Skipped train lookup during scheduled IRCTC maintenance "
+                "(23:45–00:20 Asia/Kolkata); last-known state preserved."
+            )
+            continue
+
         try:
             if watch.type == "bus":
                 fresh = fetch_bus_fn(watch.source, watch.destination, watch.date, watch.seat_type, watch.operators)
