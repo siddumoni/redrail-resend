@@ -362,3 +362,54 @@ def test_train_availability_count_change_sends_email():
     assert len(sent) == 2
     assert "Seats changed: 250" in sent[1][1]
     assert "230" in sent[1][1]
+
+def test_train_watch_is_skipped_during_irctc_maintenance_window():
+    """23:45–00:20 IST is a scheduled outage, not a scraper failure."""
+    watches = make_watches([{
+        "type": "train", "source": "MAS", "destination": "CBE",
+        "date": "2026-12-06", "classes": ["CC"],
+    }])
+    states = {}
+    sent = []
+
+    def unexpected_train_fetch(*args, **kwargs):
+        raise AssertionError("train fetch must be skipped during maintenance")
+
+    def fake_send(subject, html):
+        sent.append((subject, html))
+
+    # 18:20 UTC = 23:50 IST.
+    summary = run_once(
+        watches, states, lambda *a, **k: {}, unexpected_train_fetch,
+        fake_send, now_iso="2026-10-26T18:20:00+00:00",
+    )
+
+    wid = watches[0].watch_id()
+    assert summary["skipped_maintenance_watches"] == [wid]
+    assert summary["failed_watches"] == []
+    assert summary["failure_alerts_sent"] == []
+    assert states == {}
+    assert sent == []
+
+
+def test_train_watch_resumes_at_0020_ist_after_maintenance():
+    """The maintenance interval is end-exclusive at 00:20 IST."""
+    watches = make_watches([{
+        "type": "train", "source": "MAS", "destination": "CBE",
+        "date": "2026-12-06", "classes": ["CC"],
+    }])
+    calls = []
+
+    def fake_train_fetch(*args, **kwargs):
+        calls.append(True)
+        return {}
+
+    summary = run_once(
+        watches, {}, lambda *a, **k: {}, fake_train_fetch,
+        lambda *a, **k: None, now_iso="2026-10-26T18:50:00+00:00",
+    )
+
+    assert calls == [True]
+    assert summary["skipped_maintenance_watches"] == []
+    assert summary["failed_watches"] == []
+
