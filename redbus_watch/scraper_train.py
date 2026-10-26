@@ -377,8 +377,28 @@ def fetch_train_availability(
                 }
                 response = in_page_fetch("https://www.redbus.in/rails/api/searchResults", "POST", request_body)
                 parsed = _check_response(response, "Train search")
-                if not isinstance(parsed, dict) or "trainBtwnStnsList" not in parsed:
-                    raise ScrapeError("Train search response schema was not recognized; no availability alert will be generated.")
+
+                # Validate the known response structure, but report enough safe
+                # metadata to diagnose upstream schema changes without logging
+                # cookies, headers, response bodies, or user/session data.
+                if not isinstance(parsed, dict):
+                    raise ScrapeError(
+                        "Train search response schema was not recognized: "
+                        f"expected JSON object, received {type(parsed).__name__}."
+                    )
+                if "trainBtwnStnsList" not in parsed:
+                    top_level_keys = sorted(str(k) for k in parsed.keys())[:30]
+                    response_message = _first(
+                        parsed, "message", "error", "errorMessage", "statusMessage"
+                    )
+                    safe_message = str(response_message or "")[:240]
+                    raise ScrapeError(
+                        "Train search response schema was not recognized: "
+                        "missing 'trainBtwnStnsList'; "
+                        f"top_level_keys={top_level_keys}; "
+                        f"message={safe_message!r}. "
+                        "No availability alert will be generated."
+                    )
                 snapshots = parse_train_search_response(
                     parsed,
                     classes_filter=classes_filter,
