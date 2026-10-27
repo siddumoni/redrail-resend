@@ -1,6 +1,6 @@
 {
   "train:chennai:coimbatore:2026-12-06": {
-    "consecutive_failures": 0,
+    "consecutive_failures": 1,
     "last_alert_ts": null,
     "last_snapshots": {
       "20643_mas_cbe_cc_gn": {
@@ -76,7 +76,7 @@
         "train_no": "20643"
       }
     },
-    "last_success_ts": "2026-10-27T02:40:52.701387+00:00",
+    "last_success_ts": "2026-10-27T02:50:26.987473+00:00",
     "watch_id": "train:chennai:coimbatore:2026-12-07"
   }
 }
