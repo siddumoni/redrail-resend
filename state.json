@@ -52,7 +52,7 @@
         "train_no": "20643"
       }
     },
-    "last_success_ts": "2026-10-30T07:50:20.976991+00:00",
+    "last_success_ts": "2026-10-30T08:00:24.835520+00:00",
     "watch_id": "train:chennai:coimbatore:2026-12-06"
   },
   "train:chennai:coimbatore:2026-12-07": {
@@ -92,7 +92,7 @@
         "train_no": "20643"
       }
     },
-    "last_success_ts": "2026-10-30T07:50:20.976991+00:00",
+    "last_success_ts": "2026-10-30T08:00:24.835520+00:00",
     "watch_id": "train:chennai:coimbatore:2026-12-07"
   }
 }
