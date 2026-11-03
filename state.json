@@ -6,15 +6,15 @@
       "20643_mas_cbe_cc_gn": {
         "arrival_time": "20:15",
         "availability_date": "06-12-2026",
-        "available": 174,
+        "available": 164,
         "class": "CC",
         "departure_time": "14:15",
         "duration": "06:00",
         "from_station": "MAS",
-        "last_updated": "15 hr ago",
+        "last_updated": "Few mins ago",
         "price": 1385,
         "quota": "GN",
-        "status_text": "Available 174",
+        "status_text": "Available 164",
         "to_station": "CBE",
         "train_name": "Cbe Vandebharat",
         "train_no": "20643"
@@ -36,7 +36,7 @@
         "train_no": "20643"
       }
     },
-    "last_success_ts": "2026-11-03T22:50:36.020994+00:00",
+    "last_success_ts": "2026-11-03T23:00:26.279126+00:00",
     "watch_id": "train:chennai:coimbatore:2026-12-06"
   },
   "train:chennai:coimbatore:2026-12-07": {
@@ -46,15 +46,15 @@
       "20643_mas_cbe_cc_gn": {
         "arrival_time": "20:15",
         "availability_date": "07-12-2026",
-        "available": 190,
+        "available": 188,
         "class": "CC",
         "departure_time": "14:15",
         "duration": "06:00",
         "from_station": "MAS",
-        "last_updated": "15 hr ago",
+        "last_updated": "Few mins ago",
         "price": 1385,
         "quota": "GN",
-        "status_text": "Available 190",
+        "status_text": "Available 188",
         "to_station": "CBE",
         "train_name": "Cbe Vandebharat",
         "train_no": "20643"
@@ -76,7 +76,7 @@
         "train_no": "20643"
       }
     },
-    "last_success_ts": "2026-11-03T22:50:36.020994+00:00",
+    "last_success_ts": "2026-11-03T23:00:26.279126+00:00",
     "watch_id": "train:chennai:coimbatore:2026-12-07"
   }
 }
