@@ -36,7 +36,7 @@
         "train_no": "20643"
       }
     },
-    "last_success_ts": "2026-11-06T00:30:24.190565+00:00",
+    "last_success_ts": "2026-11-06T00:40:20.686196+00:00",
     "watch_id": "train:chennai:coimbatore:2026-11-29"
   },
   "train:chennai:coimbatore:2026-11-30": {
@@ -76,11 +76,11 @@
         "train_no": "20643"
       }
     },
-    "last_success_ts": "2026-11-06T00:30:24.190565+00:00",
+    "last_success_ts": "2026-11-06T00:40:20.686196+00:00",
     "watch_id": "train:chennai:coimbatore:2026-11-30"
   },
   "train:chennai:coimbatore:2026-12-06": {
-    "consecutive_failures": 0,
+    "consecutive_failures": 1,
     "last_alert_ts": null,
     "last_snapshots": {
       "20643_mas_cbe_cc_gn": {
@@ -156,7 +156,7 @@
         "train_no": "20643"
       }
     },
-    "last_success_ts": "2026-11-06T00:30:24.190565+00:00",
+    "last_success_ts": "2026-11-06T00:40:20.686196+00:00",
     "watch_id": "train:chennai:coimbatore:2026-12-07"
   }
 }
