@@ -27,7 +27,7 @@
         "departure_time": "14:15",
         "duration": "06:00",
         "from_station": "MAS",
-        "last_updated": "3 hr ago",
+        "last_updated": "4 hr ago",
         "price": 2505,
         "quota": "GN",
         "status_text": "GNWL 5",
@@ -36,7 +36,7 @@
         "train_no": "20643"
       }
     },
-    "last_success_ts": "2026-11-08T13:30:19.381799+00:00",
+    "last_success_ts": "2026-11-08T13:40:21.319127+00:00",
     "watch_id": "train:chennai:coimbatore:2026-11-29"
   },
   "train:chennai:coimbatore:2026-11-30": {
@@ -67,7 +67,7 @@
         "departure_time": "14:15",
         "duration": "06:00",
         "from_station": "MAS",
-        "last_updated": "5 hr ago",
+        "last_updated": "6 hr ago",
         "price": 2505,
         "quota": "GN",
         "status_text": "Available 2",
@@ -76,7 +76,7 @@
         "train_no": "20643"
       }
     },
-    "last_success_ts": "2026-11-08T13:30:19.381799+00:00",
+    "last_success_ts": "2026-11-08T13:40:21.319127+00:00",
     "watch_id": "train:chennai:coimbatore:2026-11-30"
   },
   "train:chennai:coimbatore:2026-12-06": {
@@ -91,7 +91,7 @@
         "departure_time": "14:15",
         "duration": "06:00",
         "from_station": "MAS",
-        "last_updated": "15 mins ago",
+        "last_updated": "30 mins ago",
         "price": 1385,
         "quota": "GN",
         "status_text": "Available 85",
@@ -107,7 +107,7 @@
         "departure_time": "14:15",
         "duration": "06:00",
         "from_station": "MAS",
-        "last_updated": "5 hr ago",
+        "last_updated": "6 hr ago",
         "price": 2505,
         "quota": "GN",
         "status_text": "GNWL 3",
@@ -116,7 +116,7 @@
         "train_no": "20643"
       }
     },
-    "last_success_ts": "2026-11-08T13:30:19.381799+00:00",
+    "last_success_ts": "2026-11-08T13:40:21.319127+00:00",
     "watch_id": "train:chennai:coimbatore:2026-12-06"
   },
   "train:chennai:coimbatore:2026-12-07": {
@@ -131,7 +131,7 @@
         "departure_time": "14:15",
         "duration": "06:00",
         "from_station": "MAS",
-        "last_updated": "15 mins ago",
+        "last_updated": "30 mins ago",
         "price": 1385,
         "quota": "GN",
         "status_text": "Available 158",
@@ -147,7 +147,7 @@
         "departure_time": "14:15",
         "duration": "06:00",
         "from_station": "MAS",
-        "last_updated": "5 hr ago",
+        "last_updated": "6 hr ago",
         "price": 2505,
         "quota": "GN",
         "status_text": "GNWL 7",
@@ -156,7 +156,7 @@
         "train_no": "20643"
       }
     },
-    "last_success_ts": "2026-11-08T13:30:19.381799+00:00",
+    "last_success_ts": "2026-11-08T13:40:21.319127+00:00",
     "watch_id": "train:chennai:coimbatore:2026-12-07"
   }
 }
